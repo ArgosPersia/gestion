@@ -513,6 +513,78 @@
             background: var(--teal);
             border-radius: 3px;
         }
+
+        .section-title {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--ink);
+            margin: 4px 0 12px;
+        }
+
+        .compare-wrap {
+            overflow-x: auto;
+            margin-bottom: 30px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--card);
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .compare-table th,
+        .compare-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+            white-space: nowrap;
+        }
+
+        .compare-table th {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: var(--teal-dark);
+            background: #EFFBFA;
+        }
+
+        .compare-table td.team-cell {
+            white-space: normal;
+            max-width: 220px;
+        }
+
+        .compare-table td.authors {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+        }
+
+        .compare-table td.topic {
+            color: var(--muted);
+            font-size: 11.5px;
+        }
+
+        .compare-table td.num {
+            text-align: center;
+            font-family: 'Sora', sans-serif;
+            font-weight: 800;
+            color: var(--teal-dark);
+        }
+
+        .compare-table td.votes-sub {
+            font-size: 10.5px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .compare-table tr:last-child td {
+            border-bottom: none;
+        }
     </style>
 </head>
 
@@ -605,6 +677,22 @@
                 <button class="btn secondary" style="width:auto; padding:9px 16px; font-size:13px;"
                     onclick="goWelcome()">Volver</button>
             </div>
+
+            <div class="section-title">Promedios separados — Jueces vs Equipos</div>
+            <div class="compare-wrap">
+                <table class="compare-table" id="compareTable">
+                    <thead>
+                        <tr>
+                            <th>Equipo</th>
+                            <th style="text-align:center;">Jueces</th>
+                            <th style="text-align:center;">Equipos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="compareTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="section-title">Ranking general (combinado)</div>
             <div id="resultsList"></div>
         </div>
 
@@ -896,7 +984,15 @@
 
                 const sums = {};
                 const counts = {};
-                TEAMS.forEach(t => { sums[t.id] = 0; counts[t.id] = 0; });
+                const juezSums = {};
+                const juezCounts = {};
+                const equipoSums = {};
+                const equipoCounts = {};
+                TEAMS.forEach(t => {
+                    sums[t.id] = 0; counts[t.id] = 0;
+                    juezSums[t.id] = 0; juezCounts[t.id] = 0;
+                    equipoSums[t.id] = 0; equipoCounts[t.id] = 0;
+                });
 
                 for (const k of keys) {
                     try {
@@ -906,11 +1002,34 @@
                         if (data.teamId && typeof data.rating === "number") {
                             sums[data.teamId] = (sums[data.teamId] || 0) + data.rating;
                             counts[data.teamId] = (counts[data.teamId] || 0) + 1;
+                            if (data.role === "juez") {
+                                juezSums[data.teamId] = (juezSums[data.teamId] || 0) + data.rating;
+                                juezCounts[data.teamId] = (juezCounts[data.teamId] || 0) + 1;
+                            } else {
+                                equipoSums[data.teamId] = (equipoSums[data.teamId] || 0) + data.rating;
+                                equipoCounts[data.teamId] = (equipoCounts[data.teamId] || 0) + 1;
+                            }
                         }
                     } catch (e) { }
                 }
 
                 countEl.textContent = `${keys.length} voto${keys.length === 1 ? "" : "s"} registrado${keys.length === 1 ? "" : "s"}`;
+
+                const compareBody = document.getElementById("compareTableBody");
+                compareBody.innerHTML = "";
+                TEAMS.forEach(t => {
+                    const jAvg = juezCounts[t.id] > 0 ? (juezSums[t.id] / juezCounts[t.id]) : null;
+                    const eAvg = equipoCounts[t.id] > 0 ? (equipoSums[t.id] / equipoCounts[t.id]) : null;
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+        <td class="team-cell">
+          <div class="authors">${t.id}. ${t.authors}</div>
+          <div class="topic">${t.topic}</div>
+        </td>
+        <td class="num">${jAvg !== null ? jAvg.toFixed(1) : "—"}<div class="votes-sub">${juezCounts[t.id]} voto${juezCounts[t.id] === 1 ? "" : "s"}</div></td>
+        <td class="num">${eAvg !== null ? eAvg.toFixed(1) : "—"}<div class="votes-sub">${equipoCounts[t.id]} voto${equipoCounts[t.id] === 1 ? "" : "s"}</div></td>`;
+                    compareBody.appendChild(row);
+                });
 
                 const ranked = TEAMS.map(t => ({
                     ...t,
