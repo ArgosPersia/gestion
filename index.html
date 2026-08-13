@@ -678,7 +678,7 @@
                     onclick="goWelcome()">Volver</button>
             </div>
 
-            <div class="section-title">Promedios separados — Jueces vs Equipos</div>
+            <div class="section-title">Tabla de Jueces y Equipos</div>
             <div class="compare-wrap">
                 <table class="compare-table" id="compareTable">
                     <thead>
@@ -691,9 +691,6 @@
                     <tbody id="compareTableBody"></tbody>
                 </table>
             </div>
-
-            <div class="section-title">Ranking general (combinado)</div>
-            <div id="resultsList"></div>
         </div>
 
     </div>
@@ -814,6 +811,11 @@
             return name.trim().toLowerCase().replace(/\s+/g, " ");
         }
 
+        function isProperCaseName(name) {
+            const words = name.trim().split(/\s+/);
+            return words.every(w => w.length > 0 && /^[A-ZÁÉÍÓÚÑÜ]/.test(w[0]));
+        }
+
         function getTeamById(id) {
             return TEAMS.find(t => t.id === parseInt(id));
         }
@@ -829,6 +831,13 @@
 
             if (!voterName || voterName.length < 3) {
                 errEl.textContent = "Escribe tu nombre completo.";
+                errEl.classList.remove("hidden");
+                showView("welcomeView");
+                return;
+            }
+
+            if (!isProperCaseName(voterName)) {
+                errEl.textContent = "Escribe el nombre con mayúscula inicial (Ej: Johan Pérez, no johan pérez).";
                 errEl.classList.remove("hidden");
                 showView("welcomeView");
                 return;
@@ -973,9 +982,7 @@
 
         async function goResults() {
             showView("resultsView");
-            const listEl = document.getElementById("resultsList");
             const countEl = document.getElementById("voteCount");
-            listEl.innerHTML = "";
             countEl.textContent = "Cargando votos...";
 
             try {
@@ -1031,34 +1038,8 @@
                     compareBody.appendChild(row);
                 });
 
-                const ranked = TEAMS.map(t => ({
-                    ...t,
-                    avg: counts[t.id] > 0 ? sums[t.id] / counts[t.id] : 0,
-                    votes: counts[t.id] || 0
-                })).sort((a, b) => b.avg - a.avg);
-
-                const maxAvg = ranked.length ? (ranked[0].avg || 1) : 1;
-
-                ranked.forEach((t, idx) => {
-                    const row = document.createElement("div");
-                    row.className = "result-row";
-                    const rankClass = idx === 0 ? "g1" : idx === 1 ? "g2" : idx === 2 ? "g3" : "";
-                    row.innerHTML = `
-        <div class="rank ${rankClass}">${idx + 1}</div>
-        <div class="result-info">
-          <div class="result-authors">${t.id}. ${t.authors}</div>
-          <div class="result-topic">${t.topic}</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:${maxAvg > 0 ? (t.avg / maxAvg) * 100 : 0}%"></div></div>
-        </div>
-        <div class="result-score">
-          <div class="score-num">${t.votes > 0 ? t.avg.toFixed(1) : "—"}</div>
-          <div class="score-votes">${t.votes} voto${t.votes === 1 ? "" : "s"}</div>
-        </div>`;
-                    listEl.appendChild(row);
-                });
-
             } catch (e) {
-                countEl.textContent = "No se pudieron cargar los resultados. Revisa BLOB_URL.";
+                countEl.textContent = "No se pudieron cargar los resultados.";
             }
         }
 
