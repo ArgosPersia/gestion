@@ -612,39 +612,26 @@
 
     <script>
         // ============================================================
-        // ALMACENAMIENTO COMPARTIDO (JSONBlob) — reemplaza window.storage
+        // ALMACENAMIENTO COMPARTIDO (npoint.io) — reemplaza window.storage
         // ============================================================
-        // 1. Crea tu propio "blob" (una sola vez) corriendo esto en una
-        //    terminal (o Postman / cualquier cliente HTTP):
-        //
-        //    curl -X POST -H "Content-Type: application/json" -d "{}" \
-        //         https://jsonblob.com/api/jsonBlob -D -
-        //
-        // 2. En la respuesta busca el header "Location:", algo como:
-        //    https://jsonblob.com/api/jsonBlob/1234567890123456789
-        //
-        // 3. Pega esa URL completa abajo en BLOB_URL. Listo, no necesitas
-        //    cuenta ni API key ni configurar nada más.
-        //
-        // ADVERTENCIA: ese blob queda abierto (cualquiera con la URL puede
-        // leer/escribir). Está bien para un evento corto e informal, pero
-        // no lo uses para datos sensibles ni lo dejes público para siempre.
+        // La URL de tu bin en npoint.io. Cualquiera con esta URL puede leer
+        // o escribir en ella — está bien para un evento corto e informal.
         // ============================================================
-        const BLOB_URL = "https://jsonblob.com/api/jsonBlob/019ffd1b-3fcb-73a6-b8da-221a3fea9208";
+        const BLOB_URL = "https://api.npoint.io/94a637e07140591e3738";
 
         async function readAllVotes() {
             const res = await fetch(BLOB_URL, { cache: "no-store" });
-            if (!res.ok) throw new Error("No se pudo leer el almacenamiento");
+            if (!res.ok) throw new Error("No se pudo leer (" + res.status + ")");
             return await res.json();
         }
 
         async function writeAllVotes(data) {
             const res = await fetch(BLOB_URL, {
-                method: "PUT",
+                method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data)
             });
-            if (!res.ok) throw new Error("No se pudo guardar el voto");
+            if (!res.ok) throw new Error("No se pudo guardar (" + res.status + ")");
         }
 
         const storage = {
@@ -786,7 +773,7 @@
                     return;
                 }
             } catch (e) {
-                pickErr.textContent = "No se pudo conectar con el almacenamiento. Revisa BLOB_URL.";
+                pickErr.textContent = "No se pudo conectar: " + (e && e.message ? e.message : "revisa BLOB_URL.");
                 pickErr.classList.remove("hidden");
                 return;
             }
@@ -891,7 +878,7 @@
                 document.getElementById("thanksMsg").textContent = `Calificaste al Equipo ${t.id} — ${t.authors} con ${currentRating}/10.`;
                 showView("thanksView");
             } catch (e) {
-                btn.textContent = "Error, intenta de nuevo";
+                btn.textContent = "Error: " + (e && e.message ? e.message : "desconocido");
                 btn.disabled = false;
             }
         }
