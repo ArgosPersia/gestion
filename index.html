@@ -548,7 +548,7 @@
                     <div id="qrBox" class="hidden"></div>
                     <div id="qrPlaceholder" class="qr-placeholder">Pega abajo el link publicado para generar el QR</div>
                     <label for="qrUrlInput" style="margin-top:12px;">Link publicado</label>
-                    <input type="text" id="qrUrlInput" placeholder="https://claude.ai/public/...">
+                    <input type="text" id="qrUrlInput" placeholder="https://tuusuario.github.io/repo/">
                     <button class="btn secondary" style="margin-top:-8px;" onclick="generateQr()">Generar QR</button>
                 </div>
             </div>
@@ -611,6 +611,62 @@
     </div>
 
     <script>
+        // ============================================================
+        // ALMACENAMIENTO COMPARTIDO (JSONBlob) — reemplaza window.storage
+        // ============================================================
+        // 1. Crea tu propio "blob" (una sola vez) corriendo esto en una
+        //    terminal (o Postman / cualquier cliente HTTP):
+        //
+        //    curl -X POST -H "Content-Type: application/json" -d "{}" \
+        //         https://jsonblob.com/api/jsonBlob -D -
+        //
+        // 2. En la respuesta busca el header "Location:", algo como:
+        //    https://jsonblob.com/api/jsonBlob/1234567890123456789
+        //
+        // 3. Pega esa URL completa abajo en BLOB_URL. Listo, no necesitas
+        //    cuenta ni API key ni configurar nada más.
+        //
+        // ADVERTENCIA: ese blob queda abierto (cualquiera con la URL puede
+        // leer/escribir). Está bien para un evento corto e informal, pero
+        // no lo uses para datos sensibles ni lo dejes público para siempre.
+        // ============================================================
+        const BLOB_URL = "https://jsonblob.com/api/jsonBlob/019ffd1b-3fcb-73a6-b8da-221a3fea9208";
+
+        async function readAllVotes() {
+            const res = await fetch(BLOB_URL, { cache: "no-store" });
+            if (!res.ok) throw new Error("No se pudo leer el almacenamiento");
+            return await res.json();
+        }
+
+        async function writeAllVotes(data) {
+            const res = await fetch(BLOB_URL, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+            if (!res.ok) throw new Error("No se pudo guardar el voto");
+        }
+
+        const storage = {
+            async get(key) {
+                const all = await readAllVotes();
+                if (!(key in all)) return null;
+                return { key, value: all[key] };
+            },
+            async set(key, value) {
+                const all = await readAllVotes();
+                all[key] = value;
+                await writeAllVotes(all);
+                return { key, value };
+            },
+            async list(prefix) {
+                const all = await readAllVotes();
+                const keys = Object.keys(all).filter(k => k.startsWith(prefix));
+                return { keys };
+            }
+        };
+        // ============================================================
+
         const TEAMS = [
             { id: 1, authors: "Yoana Alexandra Pérez Zapata", topic: "Despachos: predicción y consolidación de olas" },
             { id: 2, authors: "Fabian David Rubio", topic: "Cobertura anticipada de demanda comprometida" },
@@ -723,13 +779,17 @@
 
             const key = "voto:" + teamId + ":" + normalize(voterName);
             try {
-                const existing = await window.storage.get(key, true);
+                const existing = await storage.get(key);
                 if (existing) {
                     pickErr.textContent = "Ya calificaste este equipo. Elige otro.";
                     pickErr.classList.remove("hidden");
                     return;
                 }
-            } catch (e) { }
+            } catch (e) {
+                pickErr.textContent = "No se pudo conectar con el almacenamiento. Revisa BLOB_URL.";
+                pickErr.classList.remove("hidden");
+                return;
+            }
 
             openVoteView(teamId);
         }
@@ -821,7 +881,7 @@
             };
 
             try {
-                const result = await window.storage.set(key, JSON.stringify(payload), true);
+                const result = await storage.set(key, JSON.stringify(payload));
                 if (!result) {
                     btn.textContent = "Error, intenta de nuevo";
                     btn.disabled = false;
@@ -844,7 +904,7 @@
             countEl.textContent = "Cargando votos...";
 
             try {
-                const listing = await window.storage.list("voto:", true);
+                const listing = await storage.list("voto:");
                 const keys = listing && listing.keys ? listing.keys : [];
 
                 const sums = {};
@@ -853,7 +913,7 @@
 
                 for (const k of keys) {
                     try {
-                        const res = await window.storage.get(k, true);
+                        const res = await storage.get(k);
                         if (!res || !res.value) continue;
                         const data = JSON.parse(res.value);
                         if (data.teamId && typeof data.rating === "number") {
@@ -892,7 +952,7 @@
                 });
 
             } catch (e) {
-                countEl.textContent = "No se pudieron cargar los resultados.";
+                countEl.textContent = "No se pudieron cargar los resultados. Revisa BLOB_URL.";
             }
         }
 
