@@ -1039,7 +1039,7 @@
                 });
 
             } catch (e) {
-                countEl.textContent = "No se pudieron cargar los resultados.";
+                countEl.textContent = "Error: " + (e && e.message ? e.message : "desconocido");
             }
         }
 
