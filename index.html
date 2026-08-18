@@ -506,6 +506,103 @@
             background: var(--teal);
             border-radius: 3px;
         }
+.result-details {
+    margin-top: 16px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+}
+
+.vote-section {
+    margin-bottom: 14px;
+}
+
+.vote-section-title {
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--teal-dark);
+    margin-bottom: 8px;
+}
+
+.vote-person {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: #F8FBFB;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    font-size: 12.5px;
+}
+
+.vote-person-name {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.vote-person-score {
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: var(--teal-dark);
+    white-space: nowrap;
+}
+
+.result-averages {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.average-box {
+    background: #EFFBFA;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+}
+
+.average-label {
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 3px;
+}
+
+.average-value {
+    font-family: 'Sora', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--teal-dark);
+}
+
+.result-row {
+    display: block;
+}
+
+.result-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.result-top .result-info {
+    flex: 1;
+}
+
+@media (max-width: 600px) {
+    .result-top {
+        align-items: flex-start;
+    }
+
+    .result-averages {
+        grid-template-columns: 1fr;
+    }
+
+    .vote-person {
+        font-size: 12px;
+    }
+}
+
     </style>
 </head>
 
@@ -873,56 +970,279 @@
 
         function renderResults() {
             const resultsList = document.getElementById('resultsList');
-            document.getElementById('totalVotesCount').textContent = `Total votos: ${votesStore.length}`;
 
-            // Aggregate ratings
+            document.getElementById('totalVotesCount').textContent =
+                `Total votos: ${votesStore.length}`;
+
+            // Crear estadísticas para cada equipo
             const stats = TEAMS.map(t => {
+
+                // Todos los votos recibidos por este equipo
                 const teamVotes = votesStore.filter(v => v.teamId === t.id);
-                const count = teamVotes.length;
-                const sum = teamVotes.reduce((acc, curr) => acc + curr.rating, 0);
-                const avg = count > 0 ? (sum / count) : 0;
+
+                // Votos realizados por jueces
+                const judgeVotes = teamVotes.filter(v => v.role === 'juez');
+
+                // Votos realizados por autores/equipos
+                const authorVotes = teamVotes.filter(v => v.role === 'autor');
+
+                // Promedio de la mesa de jueces
+                const judgeSum = judgeVotes.reduce(
+                    (acc, vote) => acc + Number(vote.rating),
+                    0
+                );
+
+                const judgeAvg = judgeVotes.length > 0
+                    ? judgeSum / judgeVotes.length
+                    : 0;
+
+                // Promedio de equipos/autores
+                const authorSum = authorVotes.reduce(
+                    (acc, vote) => acc + Number(vote.rating),
+                    0
+                );
+
+                const authorAvg = authorVotes.length > 0
+                    ? authorSum / authorVotes.length
+                    : 0;
+
+                // Promedio general
+                const totalSum = teamVotes.reduce(
+                    (acc, vote) => acc + Number(vote.rating),
+                    0
+                );
+
+                const generalAvg = teamVotes.length > 0
+                    ? totalSum / teamVotes.length
+                    : 0;
+
                 return {
                     team: t,
-                    count: count,
-                    avg: avg
+                    allVotes: teamVotes,
+                    judgeVotes: judgeVotes,
+                    authorVotes: authorVotes,
+                    judgeAvg: judgeAvg,
+                    authorAvg: authorAvg,
+                    avg: generalAvg,
+                    count: teamVotes.length
                 };
             });
 
-            // Sort by Average desc, then by count desc
+            // Ordenar por promedio general
             stats.sort((a, b) => {
-                if (b.avg !== a.avg) return b.avg - a.avg;
+                if (b.avg !== a.avg) {
+                    return b.avg - a.avg;
+                }
+
                 return b.count - a.count;
             });
 
             resultsList.innerHTML = '';
 
             stats.forEach((item, index) => {
-                const rankNum = index + 1;
-                let rankClass = '';
-                if (rankNum === 1) rankClass = 'g1';
-                else if (rankNum === 2) rankClass = 'g2';
-                else if (rankNum === 3) rankClass = 'g3';
 
-                const pct = (item.avg / 10) * 100;
+                const rankNum = index + 1;
+
+                let rankClass = '';
+
+                if (rankNum === 1) {
+                    rankClass = 'g1';
+                } else if (rankNum === 2) {
+                    rankClass = 'g2';
+                } else if (rankNum === 3) {
+                    rankClass = 'g3';
+                }
+
+                const pct = Math.min((item.avg / 10) * 100, 100);
+
+                // -----------------------------
+                // VOTOS DE LA MESA DE JUECES
+                // -----------------------------
+
+                let judgesHTML = '';
+
+                if (item.judgeVotes.length > 0) {
+
+                    judgesHTML = item.judgeVotes.map(vote => `
+                        <div class="vote-person">
+                            <span class="vote-person-name">
+                                ${escapeHTML(vote.voter)}
+                            </span>
+
+                            <span class="vote-person-score">
+                                ${vote.rating}/10
+                            </span>
+                        </div>
+                    `).join('');
+
+                } else {
+
+                    judgesHTML = `
+                        <div class="vote-person">
+                            <span class="vote-person-name">
+                                No hay votos de jueces
+                            </span>
+                        </div>
+                    `;
+                }
+
+                // -----------------------------
+                // VOTOS DE LOS EQUIPOS/AUTORES
+                // -----------------------------
+
+                let authorsHTML = '';
+
+                if (item.authorVotes.length > 0) {
+
+                    authorsHTML = item.authorVotes.map(vote => `
+                        <div class="vote-person">
+                            <span class="vote-person-name">
+                                ${escapeHTML(vote.voter)}
+                            </span>
+
+                            <span class="vote-person-score">
+                                ${vote.rating}/10
+                            </span>
+                        </div>
+                    `).join('');
+
+                } else {
+
+                    authorsHTML = `
+                        <div class="vote-person">
+                            <span class="vote-person-name">
+                                No hay votos de equipos
+                            </span>
+                        </div>
+                    `;
+                }
+
+                // -----------------------------
+                // CREAR RESULTADO
+                // -----------------------------
 
                 const row = document.createElement('div');
+
                 row.className = 'result-row';
+
                 row.innerHTML = `
-                    <div class="rank ${rankClass}">${rankNum}</div>
-                    <div class="result-info">
-                        <div class="result-authors">Equipo #${item.team.id}: ${item.team.authors}</div>
-                        <div class="result-topic">${item.team.topic}</div>
-                        <div class="bar-bg">
-                            <div class="bar-fill" style="width: ${pct}%"></div>
+                    <div class="result-top">
+
+                        <div class="rank ${rankClass}">
+                            ${rankNum}
                         </div>
+
+                        <div class="result-info">
+
+                            <div class="result-authors">
+                                Equipo #${item.team.id}: ${escapeHTML(item.team.authors)}
+                            </div>
+
+                            <div class="result-topic">
+                                ${escapeHTML(item.team.topic)}
+                            </div>
+
+                        </div>
+
+                        <div class="result-score">
+
+                            <div class="score-num">
+                                ${item.avg.toFixed(1)}
+                            </div>
+
+                            <div class="score-votes">
+                                ${item.count}
+                                ${item.count === 1 ? 'voto' : 'votos'}
+                            </div>
+
+                        </div>
+
                     </div>
-                    <div class="result-score">
-                        <div class="score-num">${item.avg.toFixed(1)}</div>
-                        <div class="score-votes">${item.count} ${item.count === 1 ? 'voto' : 'votos'}</div>
+
+                    <div class="bar-bg">
+                        <div
+                            class="bar-fill"
+                            style="width: ${pct}%"
+                        ></div>
+                    </div>
+
+                    <div class="result-details">
+
+                        <div class="vote-section">
+
+                            <div class="vote-section-title">
+                                ⚖️ Mesa de jueces
+                            </div>
+
+                            ${judgesHTML}
+
+                        </div>
+
+                        <div class="vote-section">
+
+                            <div class="vote-section-title">
+                                👥 Votos de equipos / autores
+                            </div>
+
+                            ${authorsHTML}
+
+                        </div>
+
+                        <div class="result-averages">
+
+                            <div class="average-box">
+
+                                <div class="average-label">
+                                    PROMEDIO JUECES
+                                </div>
+
+                                <div class="average-value">
+                                    ${item.judgeAvg.toFixed(1)}
+                                </div>
+
+                            </div>
+
+                            <div class="average-box">
+
+                                <div class="average-label">
+                                    PROMEDIO EQUIPOS
+                                </div>
+
+                                <div class="average-value">
+                                    ${item.authorAvg.toFixed(1)}
+                                </div>
+
+                            </div>
+
+                            <div class="average-box">
+
+                                <div class="average-label">
+                                    PROMEDIO GENERAL
+                                </div>
+
+                                <div class="average-value">
+                                    ${item.avg.toFixed(1)}
+                                </div>
+
+                            </div>
+
+                        </div>
+
                     </div>
                 `;
+
                 resultsList.appendChild(row);
             });
+        }
+
+        // Evita que nombres ingresados por usuarios puedan interpretarse como HTML
+        function escapeHTML(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
     </script>
 </body>
