@@ -696,27 +696,39 @@
     </div>
 
     <script>
-        // ============================================================
-        // ALMACENAMIENTO COMPARTIDO (npoint.io) — reemplaza window.storage
-        // ============================================================
-        // La URL de tu bin en npoint.io. Cualquiera con esta URL puede leer
-        // o escribir en ella — está bien para un evento corto e informal.
-        // ============================================================
         const BLOB_URL = "https://api.npoint.io/94a637e07140591e3738";
 
-        async function readAllVotes() {
-            const res = await fetch(BLOB_URL, { cache: "no-store" });
-            if (!res.ok) throw new Error("No se pudo leer (" + res.status + ")");
-            return await res.json();
+        async function readAllVotes(retries) {
+            if (retries === undefined) retries = 2;
+            try {
+                const res = await fetch(BLOB_URL, { cache: "no-store" });
+                if (!res.ok) throw new Error("No se pudo leer (" + res.status + ")");
+                return await res.json();
+            } catch (e) {
+                if (retries > 0) {
+                    await new Promise(r => setTimeout(r, 800));
+                    return readAllVotes(retries - 1);
+                }
+                throw e;
+            }
         }
 
-        async function writeAllVotes(data) {
-            const res = await fetch(BLOB_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            });
-            if (!res.ok) throw new Error("No se pudo guardar (" + res.status + ")");
+        async function writeAllVotes(data, retries) {
+            if (retries === undefined) retries = 2;
+            try {
+                const res = await fetch(BLOB_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+                if (!res.ok) throw new Error("No se pudo guardar (" + res.status + ")");
+            } catch (e) {
+                if (retries > 0) {
+                    await new Promise(r => setTimeout(r, 800));
+                    return writeAllVotes(data, retries - 1);
+                }
+                throw e;
+            }
         }
 
         const storage = {
@@ -730,14 +742,8 @@
                 all[key] = value;
                 await writeAllVotes(all);
                 return { key, value };
-            },
-            async list(prefix) {
-                const all = await readAllVotes();
-                const keys = Object.keys(all).filter(k => k.startsWith(prefix));
-                return { keys };
             }
         };
-        // ============================================================
 
         const TEAMS = [
             { id: 1, authors: "Yoana Alexandra Pérez Zapata", topic: "Despachos: predicción y consolidación de olas" },
@@ -986,29 +992,22 @@
             countEl.textContent = "Cargando votos...";
 
             try {
-                const listing = await storage.list("voto:");
-                const keys = listing && listing.keys ? listing.keys : [];
+                const all = await readAllVotes();
+                const keys = Object.keys(all).filter(k => k.startsWith("voto:"));
 
-                const sums = {};
-                const counts = {};
                 const juezSums = {};
                 const juezCounts = {};
                 const equipoSums = {};
                 const equipoCounts = {};
                 TEAMS.forEach(t => {
-                    sums[t.id] = 0; counts[t.id] = 0;
                     juezSums[t.id] = 0; juezCounts[t.id] = 0;
                     equipoSums[t.id] = 0; equipoCounts[t.id] = 0;
                 });
 
                 for (const k of keys) {
                     try {
-                        const res = await storage.get(k);
-                        if (!res || !res.value) continue;
-                        const data = JSON.parse(res.value);
+                        const data = JSON.parse(all[k]);
                         if (data.teamId && typeof data.rating === "number") {
-                            sums[data.teamId] = (sums[data.teamId] || 0) + data.rating;
-                            counts[data.teamId] = (counts[data.teamId] || 0) + 1;
                             if (data.role === "juez") {
                                 juezSums[data.teamId] = (juezSums[data.teamId] || 0) + data.rating;
                                 juezCounts[data.teamId] = (juezCounts[data.teamId] || 0) + 1;
