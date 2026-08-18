@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Votación · Innovación en Logística</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
@@ -41,9 +39,7 @@
             padding: 32px 20px 80px;
         }
 
-        h1,
-        h2,
-        h3 {
+        h1, h2, h3 {
             font-family: 'Sora', sans-serif;
             margin: 0;
         }
@@ -115,8 +111,7 @@
             margin-bottom: 7px;
         }
 
-        input[type=text],
-        select {
+        input[type=text], select {
             width: 100%;
             padding: 13px 14px;
             border-radius: 12px;
@@ -128,8 +123,7 @@
             margin-bottom: 18px;
         }
 
-        input[type=text]:focus,
-        select:focus {
+        input[type=text]:focus, select:focus {
             outline: none;
             border-color: var(--teal);
         }
@@ -208,7 +202,7 @@
             align-items: start;
         }
 
-        @media (max-width:720px) {
+        @media (max-width: 720px) {
             .landing-grid {
                 grid-template-columns: 1fr;
             }
@@ -235,8 +229,7 @@
             margin-bottom: 10px;
         }
 
-        #qrBox img,
-        #qrBox canvas {
+        #qrBox img, #qrBox canvas {
             border-radius: 10px;
         }
 
@@ -513,544 +506,423 @@
             background: var(--teal);
             border-radius: 3px;
         }
-
-        .section-title {
-            font-family: 'Sora', sans-serif;
-            font-weight: 700;
-            font-size: 15px;
-            color: var(--ink);
-            margin: 4px 0 12px;
-        }
-
-        .compare-wrap {
-            overflow-x: auto;
-            margin-bottom: 30px;
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            background: var(--card);
-        }
-
-        .compare-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-
-        .compare-table th,
-        .compare-table td {
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--line);
-            white-space: nowrap;
-        }
-
-        .compare-table th {
-            font-family: 'Sora', sans-serif;
-            font-weight: 700;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-            color: var(--teal-dark);
-            background: #EFFBFA;
-        }
-
-        .compare-table td.team-cell {
-            white-space: normal;
-            max-width: 220px;
-        }
-
-        .compare-table td.authors {
-            font-family: 'Sora', sans-serif;
-            font-weight: 700;
-        }
-
-        .compare-table td.topic {
-            color: var(--muted);
-            font-size: 11.5px;
-        }
-
-        .compare-table td.num {
-            text-align: center;
-            font-family: 'Sora', sans-serif;
-            font-weight: 800;
-            color: var(--teal-dark);
-        }
-
-        .compare-table td.votes-sub {
-            font-size: 10.5px;
-            color: var(--muted);
-            font-weight: 500;
-        }
-
-        .compare-table tr:last-child td {
-            border-bottom: none;
-        }
     </style>
 </head>
 
 <body>
 
-    <button class="navbtn" id="navBtn" onclick="goResults()">Ver ranking</button>
+    <button id="navBtn" class="navbtn" onclick="toggleView()">Resultados</button>
 
     <div class="wrap">
+        <header class="hero">
+            <div class="eyebrow">Evento de Innovación</div>
+            <h1>Innovación en Logística</h1>
+            <p>Plataforma de votación en tiempo real para las sustentaciones de los equipos.</p>
+        </header>
 
-        <div id="welcomeView">
-            <div class="hero">
-                <div class="eyebrow"></div>
-                <h1>Votación por equipo</h1>
-                <p>Ingresa tu nombre, elige el equipo que vas a calificar y súbele nota de 1 a 10.</p>
-            </div>
-            <div class="landing-grid">
+        <!-- VIEW: VOTE -->
+        <main id="viewVote">
+            <!-- STEP 1: LOGIN -->
+            <div id="stepLogin" class="landing-grid">
                 <div class="card">
-                    <label for="nameInput">Tu Nombre y Apellido</label>
-                    <input type="text" id="nameInput" placeholder="">
+                    <label for="voterName">Tu Nombre Completo</label>
+                    <input type="text" id="voterName" placeholder="Ej: Maria Perez" autocomplete="name">
 
-                    <label>¿Cuál es tu rol?</label>
+                    <label>Tu Rol en el Evento</label>
                     <div class="role-group">
-                        <div class="role-opt active" id="roleJuez" onclick="setRole('juez')">Mesa Jurado</div>
-                        <div class="role-opt" id="roleAutor" onclick="setRole('autor')">Equipos</div>
+                        <div class="role-opt active" data-role="autor" onclick="selectRole('autor')">Autor / Estudiante</div>
+                        <div class="role-opt" data-role="juez" onclick="selectRole('juez')">Juez / Jurado</div>
                     </div>
 
-                    <div id="startError" class="error hidden"></div>
-                    <button class="btn" onclick="goPickTeam()">Ingresar</button>
+                    <div id="loginErr" class="error hidden">Ingresa tu nombre para continuar.</div>
+                    <button class="btn" onclick="login()">Ingresar a Votar</button>
                 </div>
 
                 <div class="qr-card">
-                    <h3>Escanea para entrar</h3>
-                    <div id="qrBox" class="hidden"></div>
-                    <div id="qrPlaceholder" class="qr-placeholder">Pega abajo el link publicado para generar el QR</div>
-                    <label for="qrUrlInput" style="margin-top:12px;">Link publicado</label>
-                    <input type="text" id="qrUrlInput" placeholder="https://tuusuario.github.io/repo/">
-                    <button class="btn secondary" style="margin-top:-8px;" onclick="generateQr()">Generar QR</button>
+                    <h3>Comparte la Votación</h3>
+                    <div id="qrBox">
+                        <div class="qr-placeholder">Cargando código QR...</div>
+                    </div>
+                    <p>Escanea este código desde otro celular para ingresar directamente.</p>
                 </div>
             </div>
-        </div>
 
-        <div id="pickTeamView" class="hidden">
-            <div class="pick-card">
-                <label for="voteTeamSelect">¿A qué equipo vas a calificar?</label>
-                <select id="voteTeamSelect"></select>
-                <div id="pickError" class="error hidden"></div>
-                <button class="btn" onclick="startVoteForTeam()">Calificar este equipo</button>
+            <!-- STEP 2: SELECT TEAM -->
+            <div id="stepPick" class="pick-card hidden">
+                <div class="eyebrow" id="welcomeUser">Bienvenido</div>
+                <h2 style="font-size: 20px; margin-bottom: 12px;">Selecciona el equipo a evaluar</h2>
+                <p style="color: var(--muted); font-size: 14px; margin-bottom: 20px;">Elige el equipo que está exponiendo en este momento.</p>
+
+                <label for="teamSelect">Equipo / Proyecto</label>
+                <select id="teamSelect" onchange="onTeamSelectChange()">
+                    <option value="">-- Selecciona un equipo --</option>
+                </select>
+
+                <button id="startVoteBtn" class="btn" disabled onclick="startVotingForTeam()">Comenzar Calificación</button>
             </div>
-        </div>
 
-        <div id="voteView" class="hidden">
-            <div class="active-team-card">
-                <div class="active-team-num" id="voteTeamNum"></div>
-                <div class="active-team-authors" id="voteTeamAuthors"></div>
-                <div class="active-team-topic" id="voteTeamTopic"></div>
+            <!-- STEP 3: VOTE TEAM -->
+            <div id="stepVoting" class="active-team-card hidden">
+                <div class="active-team-num" id="voteTeamNum">Equipo #</div>
+                <div class="active-team-authors" id="voteTeamAuthors">Autores</div>
+                <div class="active-team-topic" id="voteTeamTopic">Tema</div>
 
                 <div class="timer-wrap">
-                    <div class="timer-num" id="timerNum">30</div>
-                    <div class="timer-label">segundos para calificar</div>
+                    <div class="timer-num" id="timerNum">60</div>
+                    <div class="timer-label">segundos restantes</div>
                 </div>
                 <div class="timer-bar-bg">
-                    <div class="timer-bar-fill" id="timerBar" style="width:100%"></div>
+                    <div class="timer-bar-fill" id="timerBar"></div>
                 </div>
 
-                <div class="pills" id="pillsRow"></div>
-                <button class="btn" id="submitBtn" onclick="submitVote()" disabled>Enviar calificación</button>
-            </div>
-        </div>
+                <label style="text-align: center; margin-bottom: 12px;">Calificación (1 al 10)</label>
+                <div class="pills" id="pillsBox">
+                    <div class="pill" onclick="pickRating(1)">1</div>
+                    <div class="pill" onclick="pickRating(2)">2</div>
+                    <div class="pill" onclick="pickRating(3)">3</div>
+                    <div class="pill" onclick="pickRating(4)">4</div>
+                    <div class="pill" onclick="pickRating(5)">5</div>
+                    <div class="pill" onclick="pickRating(6)">6</div>
+                    <div class="pill" onclick="pickRating(7)">7</div>
+                    <div class="pill" onclick="pickRating(8)">8</div>
+                    <div class="pill" onclick="pickRating(9)">9</div>
+                    <div class="pill" onclick="pickRating(10)">10</div>
+                </div>
 
-        <div id="thanksView" class="hidden">
-            <div class="status">
+                <div id="voteErr" class="error hidden" style="text-align: center;">Por favor selecciona una nota de 1 a 10.</div>
+                <button class="btn" onclick="submitVote()">Enviar Calificación</button>
+            </div>
+
+            <!-- STEP 4: THANK YOU -->
+            <div id="stepThanks" class="card status hidden">
                 <div class="icon">✅</div>
-                <h2>¡Voto registrado!</h2>
-                <p id="thanksMsg">Tu calificación quedó guardada correctamente.</p>
-                <div
-                    style="margin-top:22px; display:flex; flex-direction:column; gap:10px; max-width:320px; margin-left:auto; margin-right:auto;">
-                    <button class="btn" onclick="goPickTeam()">Calificar otro equipo</button>
-                    <button class="btn secondary" onclick="goResults()">Ver ranking en vivo</button>
-                </div>
+                <h2>¡Calificación Registrada!</h2>
+                <p>Tu voto se ha guardado correctamente. Cuando comience la siguiente exposición, presiona el botón para continuar.</p>
+                <br>
+                <button class="btn secondary" onclick="resetToPick()">Evaluar Otro Equipo</button>
             </div>
-        </div>
+        </main>
 
-        <div id="resultsView" class="hidden">
-            <div class="hero" style="padding-top:8px;">
-                <div class="eyebrow">Resultados</div>
-                <h1 style="font-size:26px;">Ranking en vivo</h1>
-            </div>
+        <!-- VIEW: RESULTS -->
+        <main id="viewResults" class="hidden">
             <div class="meta-row">
-                <span class="meta-count" id="voteCount">Cargando votos...</span>
-                <button class="btn secondary" style="width:auto; padding:9px 16px; font-size:13px;"
-                    onclick="goWelcome()">Volver</button>
+                <h2>Tabla de Posiciones</h2>
+                <div class="meta-count" id="totalVotesCount">Total votos: 0</div>
             </div>
-
-            <div class="section-title">Tabla de Jueces y Equipos</div>
-            <div class="compare-wrap">
-                <table class="compare-table" id="compareTable">
-                    <thead>
-                        <tr>
-                            <th>Equipo</th>
-                            <th style="text-align:center;">Jueces</th>
-                            <th style="text-align:center;">Equipos</th>
-                        </tr>
-                    </thead>
-                    <tbody id="compareTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
+            <div id="resultsList"></div>
+        </main>
     </div>
 
     <script>
-        const BLOB_URL = "https://api.npoint.io/94a637e07140591e3738";
-
-        async function readAllVotes(retries) {
-            if (retries === undefined) retries = 2;
-            try {
-                const res = await fetch(BLOB_URL, { cache: "no-store" });
-                if (!res.ok) throw new Error("No se pudo leer (" + res.status + ")");
-                return await res.json();
-            } catch (e) {
-                if (retries > 0) {
-                    await new Promise(r => setTimeout(r, 800));
-                    return readAllVotes(retries - 1);
-                }
-                throw e;
-            }
-        }
-
-        async function writeAllVotes(data, retries) {
-            if (retries === undefined) retries = 2;
-            try {
-                const res = await fetch(BLOB_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data)
-                });
-                if (!res.ok) throw new Error("No se pudo guardar (" + res.status + ")");
-            } catch (e) {
-                if (retries > 0) {
-                    await new Promise(r => setTimeout(r, 800));
-                    return writeAllVotes(data, retries - 1);
-                }
-                throw e;
-            }
-        }
-
-        const storage = {
-            async get(key) {
-                const all = await readAllVotes();
-                if (!(key in all)) return null;
-                return { key, value: all[key] };
-            },
-            async set(key, value) {
-                const all = await readAllVotes();
-                all[key] = value;
-                await writeAllVotes(all);
-                return { key, value };
-            }
-        };
-
+        // TEAMS DATA
         const TEAMS = [
-            { id: 1, authors: "Yoana Alexandra Pérez Zapata", topic: "Despachos: predicción y consolidación de olas" },
-            { id: 2, authors: "Fabian David Rubio", topic: "Cobertura anticipada de demanda comprometida" },
-            { id: 3, authors: "Esteban Pérez · Juan David Rueda", topic: "Secuenciación de olas / recorridos picking" },
-            { id: 4, authors: "Jorge Bustamante", topic: "Donaciones corporativas (agente Claude, MEM)" },
-            { id: 5, authors: "Yeison Rúa · Mateo Ramírez · David Ramírez", topic: "Rotación de inventario (agente Claude)" },
-            { id: 6, authors: "Daniela Monsalve Canchala", topic: "Consolidación de inventario / slotting" },
-            { id: 7, authors: "Daciris Hernández Flórez", topic: "Planeación diaria del turno" },
-            { id: 8, authors: "Lina M. Castro · Juan Camilo Gómez", topic: "Automatización Informe Semáforo (importaciones)" },
-            { id: 9, authors: "Sara Atehortúa Machado", topic: "Documentación PQRS devoluciones online" },
-            { id: 10, authors: "Sara Rojas · Luisa Estrada", topic: "Planeación integrada Recibo–Almacenamiento" },
-            { id: 11, authors: "Milton Montoya Restrepo", topic: "Asignación inteligente de ubicaciones (slotting)" },
-            { id: 12, authors: "Niyireth Velandia · Juan Camilo Velásquez", topic: "Visualización de recorridos de picking" },
-            { id: 13, authors: "Daniel José Pérez Jiménez", topic: "Optimizador de ruteo y cargue urgentes" },
-            { id: 14, authors: "Estefanía Guzmán Herrera", topic: "Sincronización Facturación–Despacho" }
+            { id: 1, authors: "Luisa Estrada, Sara Rojas, Daniel Pérez", topic: "Simulador de gestión de bodegas con realidad aumentada" },
+            { id: 2, authors: "Sara Atehortua, Daciris Hernández, Estefanía Guzmán", topic: "Optimización de rutas de última milla mediante algoritmos genéticos" },
+            { id: 3, authors: "Jorge Bustamante, Yoana Perez, Yeison Rua", topic: "Sistema IoT para monitoreo de cadena de frío en transporte" },
+            { id: 4, authors: "Fabian Rubio, Angela Atehortua, Daniela", topic: "Automatización de inventarios con drones en centros de distribución" },
+            { id: 5, authors: "Jorge Herrera, Lucila Gonzalez, Lina Castro", topic: "Plataforma blockchain para trazabilidad de mercancías" },
+            { id: 6, authors: "Luisa Gómez, John Jairo Bonilla, Mateo Ramírez Peña", topic: "Predicción de demanda de carga mediante redes neuronales" },
+            { id: 7, authors: "JUAN CAMILO GOMEZ, NIYIRETH VELANDIA", topic: "Embalajes sostenibles e inteligentes con sensores biodegradables" },
+            { id: 8, authors: "Daniela, Yeison Rua, Yoana Perez", topic: "Reducción de huella de carbono en flota de transporte urbano" },
+            { id: 9, authors: "Sara Rojas, Lina Castro, Fabian Rubio", topic: "Mantenimiento predictivo de vehículos logísticos usando Machine Learning" },
+            { id: 10, authors: "Luisa Gómez, Daniel Pérez, Sara Atehortua", topic: "Gestión automatizada de devoluciones (Logística Inversa)" },
+            { id: 11, authors: "Lucila Gonzalez, Jorge Bustamante, JUAN CAMILO GOMEZ", topic: "Torre de control logística centralizada en tiempo real" },
+            { id: 12, authors: "Estefanía Guzmán, Manuela Gómez Peña, John Jairo Bonilla Cardona", topic: "Optimización de carga en contenedores mediante visión artificial" },
+            { id: 13, authors: "Ángela Atehortua, Daciris Hernández, Mateo Ramírez Peña", topic: "Sistema de despacho inteligente para micro-hubs urbanos" },
+            { id: 14, authors: "Niyireth Velandia, Luisa Estrada, Jorge Herrera", topic: "Plataforma colaborativa de transporte de carga consolidada" }
         ];
 
-        const VOTE_SECONDS = 30;
+        // INITIAL VOTES DATA INJECTED
+        const INITIAL_VOTES = {"voto:1:online":"{\"voter\":\"Online\",\"role\":\"autor\",\"teamId\":1,\"rating\":10,\"ts\":1786739108791}","voto:2:online":"{\"voter\":\"Online\",\"role\":\"autor\",\"teamId\":2,\"rating\":10,\"ts\":1786739117215}","voto:3:online":"{\"voter\":\"Online\",\"role\":\"autor\",\"teamId\":3,\"rating\":8,\"ts\":1786739127468}","voto:4:online":"{\"voter\":\"Online\",\"role\":\"autor\",\"teamId\":4,\"rating\":10,\"ts\":1786739135374}","voto:5:online":"{\"voter\":\"Online\",\"role\":\"autor\",\"teamId\":5,\"rating\":10,\"ts\":1786739099188}","voto:6:online":"{\"voter\":\"Online\",\"role\":\"autor\",\"teamId\":6,\"rating\":7,\"ts\":1786739521520}","voto:1:daniela":"{\"voter\":\"Daniela\",\"role\":\"autor\",\"teamId\":1,\"rating\":10,\"ts\":1786736452045}","voto:2:daniela":"{\"voter\":\"Daniela\",\"role\":\"autor\",\"teamId\":2,\"rating\":10,\"ts\":1786737113686}","voto:5:daniela":"{\"voter\":\"Daniela\",\"role\":\"autor\",\"teamId\":5,\"rating\":10,\"ts\":1786739036722}","voto:7:daniela":"{\"voter\":\"Daniela\",\"role\":\"autor\",\"teamId\":7,\"rating\":10,\"ts\":1786739925349}","voto:8:daniela":"{\"voter\":\"Daniela\",\"role\":\"autor\",\"teamId\":8,\"rating\":8,\"ts\":1786740896139}","voto:12:daniela":"{\"voter\":\"Daniela\",\"role\":\"autor\",\"teamId\":12,\"rating\":10,\"ts\":1786744357874}","voto:1:sara rojas":"{\"voter\":\"Sara Rojas\",\"role\":\"autor\",\"teamId\":1,\"rating\":7,\"ts\":1786736380243}","voto:1:yeison rua":"{\"voter\":\"Yeison Rua\",\"role\":\"autor\",\"teamId\":1,\"rating\":8,\"ts\":1786737162736}","voto:2:yeison rua":"{\"voter\":\"Yeison Rua\",\"role\":\"autor\",\"teamId\":2,\"rating\":10,\"ts\":1786737172100}","voto:3:yeison rua":"{\"voter\":\"Yeison Rua\",\"role\":\"autor\",\"teamId\":3,\"rating\":9,\"ts\":1786737866054}","voto:4:sara rojas":"{\"voter\":\"Sara Rojas\",\"role\":\"autor\",\"teamId\":4,\"rating\":10,\"ts\":1786739116547}","voto:4:yeison rua":"{\"voter\":\"Yeison Rua\",\"role\":\"autor\",\"teamId\":4,\"rating\":10,\"ts\":1786739160865}","voto:5:sara rojas":"{\"voter\":\"Sara Rojas\",\"role\":\"autor\",\"teamId\":5,\"rating\":8,\"ts\":1786739054654}","voto:6:sara rojas":"{\"voter\":\"Sara Rojas\",\"role\":\"autor\",\"teamId\":6,\"rating\":10,\"ts\":1786739444978}","voto:6:yeison rua":"{\"voter\":\"Yeison Rua\",\"role\":\"autor\",\"teamId\":6,\"rating\":10,\"ts\":1786739452753}","voto:7:sara rojas":"{\"voter\":\"Sara Rojas\",\"role\":\"autor\",\"teamId\":7,\"rating\":9,\"ts\":1786739918260}","voto:7:yeison rua":"{\"voter\":\"Yeison Rua\",\"role\":\"autor\",\"teamId\":7,\"rating\":9,\"ts\":1786739932256}","voto:8:sara rojas":"{\"voter\":\"Sara Rojas\",\"role\":\"autor\",\"teamId\":8,\"rating\":9,\"ts\":1786740465698}","voto:8:yeison rua":"{\"voter\":\"Yeison Rua\",\"role\":\"autor\",\"teamId\":8,\"rating\":10,\"ts\":1786740940453}","voto:9:sara rojas":"{\"voter\":\"Sara Rojas\",\"role\":\"autor\",\"teamId\":9,\"rating\":8,\"ts\":1786741488379}","voto:9:yeison rua":"{\"voter\":\"Yeison Rua\",\"role\":\"autor\",\"teamId\":9,\"rating\":10,\"ts\":1786741501828}","voto:1:yoana perez":"{\"voter\":\"Yoana Perez\",\"role\":\"autor\",\"teamId\":1,\"rating\":9,\"ts\":1786739055079}","voto:2:lina castro":"{\"voter\":\"Lina Castro\",\"role\":\"autor\",\"teamId\":2,\"rating\":10,\"ts\":1786737192232}","voto:3:lina castro":"{\"voter\":\"Lina Castro\",\"role\":\"autor\",\"teamId\":3,\"rating\":9,\"ts\":1786737907492}","voto:3:yoana perez":"{\"voter\":\"Yoana Perez\",\"role\":\"autor\",\"teamId\":3,\"rating\":10,\"ts\":1786737777321}","voto:5:lina castro":"{\"voter\":\"Lina Castro\",\"role\":\"autor\",\"teamId\":5,\"rating\":8,\"ts\":1786739044065}","voto:6:lina castro":"{\"voter\":\"Lina Castro\",\"role\":\"autor\",\"teamId\":6,\"rating\":7,\"ts\":1786739475585}","voto:7:yoana perez":"{\"voter\":\"Yoana Perez\",\"role\":\"autor\",\"teamId\":7,\"rating\":10,\"ts\":1786739957160}","voto:8:lina castro":"{\"voter\":\"Lina Castro\",\"role\":\"autor\",\"teamId\":8,\"rating\":10,\"ts\":1786740873010}","voto:8:yoana perez":"{\"voter\":\"Yoana Perez\",\"role\":\"autor\",\"teamId\":8,\"rating\":9,\"ts\":1786740683862}","voto:9:yoana perez":"{\"voter\":\"Yoana Perez\",\"role\":\"autor\",\"teamId\":9,\"rating\":9,\"ts\":1786741481894}","voto:11:yoana perez":"{\"voter\":\"Yoana Perez\",\"role\":\"autor\",\"teamId\":11,\"rating\":10,\"ts\":1786745241922}","voto:13:lina castro":"{\"voter\":\"Lina Castro\",\"role\":\"autor\",\"teamId\":13,\"rating\":8,\"ts\":1786743976016}","voto:1:fabian rubio":"{\"voter\":\"Fabian Rubio\",\"role\":\"autor\",\"teamId\":1,\"rating\":7,\"ts\":1786736410384}","voto:1:luisa gómez":"{\"voter\":\"Luisa Gómez\",\"role\":\"autor\",\"teamId\":1,\"rating\":7,\"ts\":1786736393442}","voto:2:luisa gómez":"{\"voter\":\"Luisa Gómez\",\"role\":\"autor\",\"teamId\":2,\"rating\":9,\"ts\":1786737097129}","voto:4:fabian rubio":"{\"voter\":\"Fabian Rubio\",\"role\":\"autor\",\"teamId\":4,\"rating\":10,\"ts\":1786739168148}","voto:5:fabian rubio":"{\"voter\":\"Fabian Rubio\",\"role\":\"autor\",\"teamId\":5,\"rating\":7,\"ts\":1786739066270}","voto:6:fabian rubio":"{\"voter\":\"Fabian Rubio\",\"role\":\"autor\",\"teamId\":6,\"rating\":10,\"ts\":1786739501600}","voto:6:luisa gómez":"{\"voter\":\"Luisa Gómez\",\"role\":\"autor\",\"teamId\":6,\"rating\":9,\"ts\":1786739457386}","voto:8:luisa gómez":"{\"voter\":\"Luisa Gómez\",\"role\":\"autor\",\"teamId\":8,\"rating\":10,\"ts\":1786740930433}","voto:9:fabian rubio":"{\"voter\":\"Fabian Rubio\",\"role\":\"autor\",\"teamId\":9,\"rating\":8,\"ts\":1786743996703}","voto:10:fabian rubio":"{\"voter\":\"Fabian Rubio\",\"role\":\"autor\",\"teamId\":10,\"rating\":8,\"ts\":1786744010970}","voto:12:fabian rubio":"{\"voter\":\"Fabian Rubio\",\"role\":\"autor\",\"teamId\":12,\"rating\":10,\"ts\":1786744079764}","voto:1:daniel pérez":"{\"voter\":\"Daniel Pérez\",\"role\":\"autor\",\"teamId\":1,\"rating\":9,\"ts\":1786736385156}","voto:1:jorge herrera":"{\"voter\":\"Jorge Herrera\",\"role\":\"juez\",\"teamId\":1,\"rating\":6,\"ts\":1786737427633}","voto:1:luisa estrada":"{\"voter\":\"Luisa Estrada\",\"role\":\"autor\",\"teamId\":1,\"rating\":6,\"ts\":1786736362891}","voto:2:daniel pérez":"{\"voter\":\"Daniel Pérez\",\"role\":\"autor\",\"teamId\":2,\"rating\":9,\"ts\":1786737123056}","voto:2:jorge herrera":"{\"voter\":\"Jorge Herrera\",\"role\":\"juez\",\"teamId\":2,\"rating\":9,\"ts\":1786737187636}","voto:2:luisa estrada":"{\"voter\":\"Luisa Estrada\",\"role\":\"autor\",\"teamId\":2,\"rating\":9,\"ts\":1786737087053}","voto:3:daniel pérez":"{\"voter\":\"Daniel Pérez\",\"role\":\"autor\",\"teamId\":3,\"rating\":9,\"ts\":1786737869064}","voto:3:jorge herrera":"{\"voter\":\"Jorge Herrera\",\"role\":\"juez\",\"teamId\":3,\"rating\":9,\"ts\":1786737922106}","voto:4:daniel pérez":"{\"voter\":\"Daniel Pérez\",\"role\":\"autor\",\"teamId\":4,\"rating\":7,\"ts\":1786738387711}","voto:4:jorge herrera":"{\"voter\":\"Jorge Herrera\",\"role\":\"juez\",\"teamId\":4,\"rating\":8,\"ts\":1786738432531}","voto:5:jorge herrera":"{\"voter\":\"Jorge Herrera\",\"role\":\"juez\",\"teamId\":5,\"rating\":8,\"ts\":1786739075936}","voto:5:luisa estrada":"{\"voter\":\"Luisa Estrada\",\"role\":\"autor\",\"teamId\":5,\"rating\":7,\"ts\":1786739048669}","voto:6:daniel pérez":"{\"voter\":\"Daniel Pérez\",\"role\":\"autor\",\"teamId\":6,\"rating\":9,\"ts\":1786739490781}","voto:6:jorge herrera":"{\"voter\":\"Jorge Herrera\",\"role\":\"juez\",\"teamId\":6,\"rating\":9,\"ts\":1786739459796}","voto:6:luisa estrada":"{\"voter\":\"Luisa Estrada\",\"role\":\"autor\",\"teamId\":6,\"rating\":10,\"ts\":1786739434214}","voto:7:jorge herrera":"{\"voter\":\"Jorge Herrera\",\"role\":\"juez\",\"teamId\":7,\"rating\":8,\"ts\":1786739938048}","voto:7:luisa estrada":"{\"voter\":\"Luisa Estrada\",\"role\":\"autor\",\"teamId\":7,\"rating\":8,\"ts\":1786739905976}","voto:8:daniel pérez":"{\"voter\":\"Daniel Pérez\",\"role\":\"autor\",\"teamId\":8,\"rating\":10,\"ts\":1786740942151}","voto:8:jorge herrera":"{\"voter\":\"Jorge Herrera\",\"role\":\"juez\",\"teamId\":8,\"rating\":9,\"ts\":1786740990628}","voto:8:luisa estrada":"{\"voter\":\"Luisa Estrada\",\"role\":\"autor\",\"teamId\":8,\"rating\":6,\"ts\":1786740940859}","voto:9:daniel pérez":"{\"voter\":\"Daniel Pérez\",\"role\":\"autor\",\"teamId\":9,\"rating\":7,\"ts\":1786741662704}","voto:12:daniel pérez":"{\"voter\":\"Daniel Pérez\",\"role\":\"autor\",\"teamId\":12,\"rating\":9,\"ts\":1786743985669}","voto:13:daniel pérez":"{\"voter\":\"Daniel Pérez\",\"role\":\"autor\",\"teamId\":13,\"rating\":10,\"ts\":1786743993514}","voto:1:sara atehortua":"{\"voter\":\"Sara Atehortua\",\"role\":\"autor\",\"teamId\":1,\"rating\":5,\"ts\":1786736395963}","voto:2:sara atehortua":"{\"voter\":\"Sara Atehortua\",\"role\":\"autor\",\"teamId\":2,\"rating\":10,\"ts\":1786737081264}","voto:3:sara atehortua":"{\"voter\":\"Sara Atehortua\",\"role\":\"autor\",\"teamId\":3,\"rating\":8,\"ts\":1786737878080}","voto:4:sara atehortua":"{\"voter\":\"Sara Atehortua\",\"role\":\"autor\",\"teamId\":4,\"rating\":9,\"ts\":1786738276548}","voto:5:sara atehortua":"{\"voter\":\"Sara Atehortua\",\"role\":\"autor\",\"teamId\":5,\"rating\":6,\"ts\":1786739053589}","voto:6:sara atehortua":"{\"voter\":\"Sara Atehortua\",\"role\":\"autor\",\"teamId\":6,\"rating\":7,\"ts\":1786739461060}","voto:7:sara atehortua":"{\"voter\":\"Sara Atehortua\",\"role\":\"autor\",\"teamId\":7,\"rating\":10,\"ts\":1786740008554}","voto:8:sara atehortua":"{\"voter\":\"Sara Atehortua\",\"role\":\"autor\",\"teamId\":8,\"rating\":8,\"ts\":1786740879403}","voto:1:lucila gonzalez":"{\"voter\":\"Lucila Gonzalez\",\"role\":\"juez\",\"teamId\":1,\"rating\":6,\"ts\":1786736421285}","voto:3:lucila gonzalez":"{\"voter\":\"Lucila Gonzalez\",\"role\":\"juez\",\"teamId\":3,\"rating\":10,\"ts\":1786737864915}","voto:4:lucila gonzalez":"{\"voter\":\"Lucila Gonzalez\",\"role\":\"juez\",\"teamId\":4,\"rating\":9,\"ts\":1786738395223}","voto:5:lucila gonzalez":"{\"voter\":\"Lucila Gonzalez\",\"role\":\"juez\",\"teamId\":5,\"rating\":8,\"ts\":1786739028340}","voto:6:lucila gonzalez":"{\"voter\":\"Lucila Gonzalez\",\"role\":\"juez\",\"teamId\":6,\"rating\":10,\"ts\":1786739448376}","voto:7:lucila gonzalez":"{\"voter\":\"Lucila Gonzalez\",\"role\":\"juez\",\"teamId\":7,\"rating\":9,\"ts\":1786739940865}","voto:8:lucila gonzalez":"{\"voter\":\"Lucila Gonzalez\",\"role\":\"juez\",\"teamId\":8,\"rating\":10,\"ts\":1786740885674}","voto:9:lucila gonzalez":"{\"voter\":\"Lucila Gonzalez\",\"role\":\"juez\",\"teamId\":9,\"rating\":6,\"ts\":1786741508264}","voto:13:lucila gonzalez":"{\"voter\":\"Lucila Gonzalez\",\"role\":\"juez\",\"teamId\":13,\"rating\":8,\"ts\":1786743979117}","voto:1:angela atehortua":"{\"voter\":\"Angela Atehortua\",\"role\":\"juez\",\"teamId\":1,\"rating\":8,\"ts\":1786737232371}","voto:1:jorge bustamante":"{\"voter\":\"Jorge Bustamante\",\"role\":\"autor\",\"teamId\":1,\"rating\":10,\"ts\":1786736396459}","voto:3:angela atehortua":"{\"voter\":\"Angela Atehortua\",\"role\":\"juez\",\"teamId\":3,\"rating\":8,\"ts\":1786737901931}","voto:3:jorge bustamante":"{\"voter\":\"Jorge Bustamante\",\"role\":\"autor\",\"teamId\":3,\"rating\":9,\"ts\":1786737843637}","voto:4:angela atehortua":"{\"voter\":\"Angela Atehortua\",\"role\":\"juez\",\"teamId\":4,\"rating\":9,\"ts\":1786738460141}","voto:5:angela atehortua":"{\"voter\":\"Angela Atehortua\",\"role\":\"juez\",\"teamId\":5,\"rating\":8,\"ts\":1786739076573}","voto:5:jorge bustamante":"{\"voter\":\"Jorge Bustamante\",\"role\":\"autor\",\"teamId\":5,\"rating\":10,\"ts\":1786739022944}","voto:6:angela atehortua":"{\"voter\":\"Angela Atehortua\",\"role\":\"juez\",\"teamId\":6,\"rating\":8,\"ts\":1786739544645}","voto:6:jorge bustamante":"{\"voter\":\"Jorge Bustamante\",\"role\":\"autor\",\"teamId\":6,\"rating\":10,\"ts\":1786739452675}","voto:7:angela atehortua":"{\"voter\":\"Angela Atehortua\",\"role\":\"juez\",\"teamId\":7,\"rating\":9,\"ts\":1786739961271}","voto:7:jorge bustamante":"{\"voter\":\"Jorge Bustamante\",\"role\":\"autor\",\"teamId\":7,\"rating\":10,\"ts\":1786739926218}","voto:8:angela atehortua":"{\"voter\":\"Angela Atehortua\",\"role\":\"juez\",\"teamId\":8,\"rating\":8,\"ts\":1786741040911}","voto:8:jorge bustamante":"{\"voter\":\"Jorge Bustamante\",\"role\":\"autor\",\"teamId\":8,\"rating\":10,\"ts\":1786740877858}","voto:9:angela atehortua":"{\"voter\":\"Angela Atehortua\",\"role\":\"juez\",\"teamId\":9,\"rating\":8,\"ts\":1786741589850}","voto:9:jorge bustamante":"{\"voter\":\"Jorge Bustamante\",\"role\":\"autor\",\"teamId\":9,\"rating\":10,\"ts\":1786741478132}","voto:14:jorge bustamante":"{\"voter\":\"Jorge Bustamante\",\"role\":\"autor\",\"teamId\":14,\"rating\":10,\"ts\":1786744575244}","voto:1:juan camilo gomez":"{\"voter\":\"JUAN CAMILO GOMEZ\",\"role\":\"autor\",\"teamId\":1,\"rating\":8,\"ts\":1786736430896}","voto:1:ángela atehortua":"{\"voter\":\"Ángela Atehortua\",\"role\":\"juez\",\"teamId\":1,\"rating\":8,\"ts\":1786736441929}","voto:2:juan camilo gomez":"{\"voter\":\"JUAN CAMILO GOMEZ\",\"role\":\"autor\",\"teamId\":2,\"rating\":10,\"ts\":1786737183534}","voto:2:niyireth velandia":"{\"voter\":\"NIYIRETH VELANDIA\",\"role\":\"autor\",\"teamId\":2,\"rating\":10,\"ts\":1786737118841}","voto:2:ángela atehortua":"{\"voter\":\"Ángela Atehortua\",\"role\":\"juez\",\"teamId\":2,\"rating\":9,\"ts\":1786737112325}","voto:3:niyireth velandia":"{\"voter\":\"NIYIRETH VELANDIA\",\"role\":\"autor\",\"teamId\":3,\"rating\":10,\"ts\":1786737868231}","voto:5:juan camilo gomez":"{\"voter\":\"JUAN CAMILO GOMEZ\",\"role\":\"autor\",\"teamId\":5,\"rating\":10,\"ts\":1786739934217}","voto:5:niyireth velandia":"{\"voter\":\"NIYIRETH VELANDIA\",\"role\":\"autor\",\"teamId\":5,\"rating\":10,\"ts\":1786739024113}","voto:6:juan camilo gomez":"{\"voter\":\"JUAN CAMILO GOMEZ\",\"role\":\"autor\",\"teamId\":6,\"rating\":7,\"ts\":1786739942727}","voto:6:niyireth velandia":"{\"voter\":\"NIYIRETH VELANDIA\",\"role\":\"autor\",\"teamId\":6,\"rating\":10,\"ts\":1786739473631}","voto:8:juan camilo gomez":"{\"voter\":\"JUAN CAMILO GOMEZ\",\"role\":\"autor\",\"teamId\":8,\"rating\":10,\"ts\":1786742471540}","voto:8:niyireth velandia":"{\"voter\":\"NIYIRETH VELANDIA\",\"role\":\"autor\",\"teamId\":8,\"rating\":10,\"ts\":1786740871302}","voto:9:juan camilo gomez":"{\"voter\":\"JUAN CAMILO GOMEZ\",\"role\":\"autor\",\"teamId\":9,\"rating\":7,\"ts\":1786742083209}","voto:9:niyireth velandia":"{\"voter\":\"NIYIRETH VELANDIA\",\"role\":\"autor\",\"teamId\":9,\"rating\":8,\"ts\":1786741492901}","voto:10:juan camilo gomez":"{\"voter\":\"JUAN CAMILO GOMEZ\",\"role\":\"autor\",\"teamId\":10,\"rating\":6,\"ts\":1786742535244}","voto:11:juan camilo gomez":"{\"voter\":\"JUAN CAMILO GOMEZ\",\"role\":\"autor\",\"teamId\":11,\"rating\":8,\"ts\":1786745229875}","voto:12:juan camilo gomez":"{\"voter\":\"JUAN CAMILO GOMEZ\",\"role\":\"autor\",\"teamId\":12,\"rating\":10,\"ts\":1786743227522}","voto:13:juan camilo gomez":"{\"voter\":\"JUAN CAMILO GOMEZ\",\"role\":\"autor\",\"teamId\":13,\"rating\":9,\"ts\":1786743972577}","voto:14:juan camilo gomez":"{\"voter\":\"JUAN CAMILO GOMEZ\",\"role\":\"autor\",\"teamId\":14,\"rating\":8,\"ts\":1786744573048}","voto:1:estefanía guzmán":"{\"voter\":\"Estefanía Guzmán\",\"role\":\"autor\",\"teamId\":1,\"rating\":10,\"ts\":1786736454099}","voto:2:daciris hernández":"{\"voter\":\"Daciris Hernández\",\"role\":\"autor\",\"teamId\":2,\"rating\":10,\"ts\":1786737100006}","voto:2:estefanía guzmán":"{\"voter\":\"Estefanía Guzmán\",\"role\":\"autor\",\"teamId\":2,\"rating\":10,\"ts\":1786737105479}","voto:2:john jairo bonilla":"{\"voter\":\"John Jairo Bonilla\",\"role\":\"autor\",\"teamId\":2,\"rating\":10,\"ts\":1786737201218}","voto:3:daciris hernández":"{\"voter\":\"Daciris Hernández\",\"role\":\"autor\",\"teamId\":3,\"rating\":10,\"ts\":1786737866655}","voto:3:estefanía guzmán":"{\"voter\":\"Estefanía Guzmán\",\"role\":\"autor\",\"teamId\":3,\"rating\":10,\"ts\":1786737753538}","voto:3:john jairo bonilla":"{\"voter\":\"John Jairo Bonilla\",\"role\":\"autor\",\"teamId\":3,\"rating\":8,\"ts\":1786737909456}","voto:4:estefanía guzmán":"{\"voter\":\"Estefanía Guzmán\",\"role\":\"autor\",\"teamId\":4,\"rating\":10,\"ts\":1786738348804}","voto:5:daciris hernández":"{\"voter\":\"Daciris Hernández\",\"role\":\"autor\",\"teamId\":5,\"rating\":10,\"ts\":1786739042197}","voto:5:estefanía guzmán":"{\"voter\":\"Estefanía Guzmán\",\"role\":\"autor\",\"teamId\":5,\"rating\":10,\"ts\":1786739045386}","voto:5:john jairo bonilla":"{\"voter\":\"John Jairo Bonilla\",\"role\":\"autor\",\"teamId\":5,\"rating\":9,\"ts\":1786739031130}","voto:6:daciris hernández":"{\"voter\":\"Daciris Hernández\",\"role\":\"autor\",\"teamId\":6,\"rating\":10,\"ts\":1786739467480}","voto:6:estefanía guzmán":"{\"voter\":\"Estefanía Guzmán\",\"role\":\"autor\",\"teamId\":6,\"rating\":10,\"ts\":1786739661460}","voto:6:john jairo bonilla":"{\"voter\":\"John Jairo Bonilla\",\"role\":\"autor\",\"teamId\":6,\"rating\":10,\"ts\":1786739446176}","voto:7:estefanía guzmán":"{\"voter\":\"Estefanía Guzmán\",\"role\":\"autor\",\"teamId\":7,\"rating\":10,\"ts\":1786739914263}","voto:7:john jairo bonilla":"{\"voter\":\"John Jairo Bonilla\",\"role\":\"autor\",\"teamId\":7,\"rating\":9,\"ts\":1786739922999}","voto:8:estefanía guzmán":"{\"voter\":\"Estefanía Guzmán\",\"role\":\"autor\",\"teamId\":8,\"rating\":10,\"ts\":1786740859301}","voto:9:daciris hernández":"{\"voter\":\"Daciris Hernández\",\"role\":\"autor\",\"teamId\":9,\"rating\":5,\"ts\":1786741474925}","voto:9:estefanía guzmán":"{\"voter\":\"Estefanía Guzmán\",\"role\":\"autor\",\"teamId\":9,\"rating\":10,\"ts\":1786741541978}","voto:10:daciris hernández":"{\"voter\":\"Daciris Hernández\",\"role\":\"autor\",\"teamId\":10,\"rating\":10,\"ts\":1786742485669}","voto:13:daciris hernández":"{\"voter\":\"Daciris Hernández\",\"role\":\"autor\",\"teamId\":13,\"rating\":8,\"ts\":1786743975340}","voto:14:daciris hernández":"{\"voter\":\"Daciris Hernández\",\"role\":\"autor\",\"teamId\":14,\"rating\":10,\"ts\":1786744567742}","voto:2:manuela gómez peña":"{\"voter\":\"Manuela Gómez Peña\",\"role\":\"juez\",\"teamId\":2,\"rating\":8,\"ts\":1786737126618}","voto:3:manuela gómez peña":"{\"voter\":\"Manuela Gómez Peña\",\"role\":\"juez\",\"teamId\":3,\"rating\":8,\"ts\":1786737930405}","voto:4:manuela gómez peña":"{\"voter\":\"Manuela Gómez Peña\",\"role\":\"juez\",\"teamId\":4,\"rating\":8,\"ts\":1786738379640}","voto:5:manuela gómez peña":"{\"voter\":\"Manuela Gómez Peña\",\"role\":\"juez\",\"teamId\":5,\"rating\":7,\"ts\":1786739039629}","voto:5:mateo ramírez peña":"{\"voter\":\"Mateo Ramírez Peña\",\"role\":\"autor\",\"teamId\":5,\"rating\":10,\"ts\":1786739976860}","voto:6:manuela gómez peña":"{\"voter\":\"Manuela Gómez Peña\",\"role\":\"juez\",\"teamId\":6,\"rating\":7,\"ts\":1786739464385}","voto:7:manuela gómez peña":"{\"voter\":\"Manuela Gómez Peña\",\"role\":\"juez\",\"teamId\":7,\"rating\":8,\"ts\":1786739942816}","voto:7:mateo ramírez peña":"{\"voter\":\"Mateo Ramírez Peña\",\"role\":\"autor\",\"teamId\":7,\"rating\":6,\"ts\":1786739988978}","voto:9:manuela gómez peña":"{\"voter\":\"Manuela Gómez Peña\",\"role\":\"juez\",\"teamId\":9,\"rating\":7,\"ts\":1786741528665}","voto:11:manuela gómez peña":"{\"voter\":\"Manuela Gómez Peña\",\"role\":\"juez\",\"teamId\":11,\"rating\":9,\"ts\":1786745234614}","voto:1:john jairo bonilla cardona":"{\"voter\":\"John Jairo Bonilla Cardona\",\"role\":\"autor\",\"teamId\":1,\"rating\":9,\"ts\":1786736420536}","voto:11:angela atehortua":"{\"voter\":\"Angela Atehortua\",\"role\":\"juez\",\"teamId\":11,\"rating\":8,\"ts\":1786745260101}"};
 
-        let selectedRole = "juez";
-        let voterName = "";
-        let currentRating = null;
+        // APPLICATION STATE
+        let currentUser = null;
+        let selectedRole = 'autor';
+        let selectedTeamId = null;
+        let selectedRating = null;
         let timerInterval = null;
-        let voteContext = null;
+        let timeLeft = 60;
+        let isResultsView = false;
+        let votesStore = [];
 
-        function generateQr() {
-            const url = document.getElementById("qrUrlInput").value.trim();
-            const box = document.getElementById("qrBox");
-            const placeholder = document.getElementById("qrPlaceholder");
+        // INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            initVotes();
+            populateTeamSelect();
+            generateQRCode();
+            loadUserFromStorage();
+        });
 
-            if (!url || !/^https?:\/\//i.test(url)) {
-                box.innerHTML = "";
-                box.classList.add("hidden");
-                placeholder.classList.remove("hidden");
-                placeholder.textContent = "Pega un link que empiece por http:// o https://";
-                return;
+        function initVotes() {
+            let stored = localStorage.getItem('app_votes');
+            if (stored) {
+                votesStore = JSON.parse(stored);
+            } else {
+                votesStore = [];
+                for (let key in INITIAL_VOTES) {
+                    try {
+                        let parsed = JSON.parse(INITIAL_VOTES[key]);
+                        votesStore.push(parsed);
+                    } catch (e) {
+                        console.error("Error parsing vote", e);
+                    }
+                }
+                localStorage.setItem('app_votes', JSON.stringify(votesStore));
             }
+        }
 
+        function populateTeamSelect() {
+            const select = document.getElementById('teamSelect');
+            select.innerHTML = '<option value="">-- Selecciona un equipo --</option>';
+            TEAMS.forEach(t => {
+                let opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = `Equipo ${t.id}: ${t.authors}`;
+                select.appendChild(opt);
+            });
+        }
+
+        function generateQRCode() {
+            const qrBox = document.getElementById('qrBox');
+            qrBox.innerHTML = '';
             try {
-                box.innerHTML = "";
-                box.classList.remove("hidden");
-                placeholder.classList.add("hidden");
-                new QRCode(box, {
-                    text: url,
+                new QRCode(qrBox, {
+                    text: window.location.href,
                     width: 160,
                     height: 160,
                     colorDark: "#0F2A2E",
-                    colorLight: "#FFFFFF"
+                    colorLight: "#FFFFFF",
+                    correctLevel: QRCode.CorrectLevel.H
                 });
-            } catch (e) { }
-        }
-
-        function prefillQrUrl() {
-            const input = document.getElementById("qrUrlInput");
-            const current = window.location.href;
-            if (/^https?:\/\//i.test(current)) {
-                input.value = current;
-                generateQr();
-            }
-        }
-        prefillQrUrl();
-
-        function setRole(role) {
-            selectedRole = role;
-            document.getElementById("roleJuez").classList.toggle("active", role === "juez");
-            document.getElementById("roleAutor").classList.toggle("active", role === "autor");
-        }
-
-        function normalize(name) {
-            return name.trim().toLowerCase().replace(/\s+/g, " ");
-        }
-
-        function isProperCaseName(name) {
-            const words = name.trim().split(/\s+/);
-            return words.every(w => w.length > 0 && /^[A-ZÁÉÍÓÚÑÜ]/.test(w[0]));
-        }
-
-        function getTeamById(id) {
-            return TEAMS.find(t => t.id === parseInt(id));
-        }
-
-        function goPickTeam() {
-            const errEl = document.getElementById("startError");
-            if (errEl) errEl.classList.add("hidden");
-
-            const nameRaw = document.getElementById("nameInput").value;
-            if (nameRaw && nameRaw.trim().length >= 3) {
-                voterName = nameRaw.trim();
-            }
-
-            if (!voterName || voterName.length < 3) {
-                errEl.textContent = "Escribe tu nombre completo.";
-                errEl.classList.remove("hidden");
-                showView("welcomeView");
-                return;
-            }
-
-            if (!isProperCaseName(voterName)) {
-                errEl.textContent = "Escribe el nombre con mayúscula inicial (Ej: Johan Pérez, no johan pérez).";
-                errEl.classList.remove("hidden");
-                showView("welcomeView");
-                return;
-            }
-
-            const voteTeamSelect = document.getElementById("voteTeamSelect");
-            voteTeamSelect.innerHTML = "";
-            TEAMS.forEach(t => {
-                const opt = document.createElement("option");
-                opt.value = t.id;
-                opt.textContent = `Equipo ${t.id} — ${t.authors} — ${t.topic}`;
-                voteTeamSelect.appendChild(opt);
-            });
-
-            document.getElementById("pickError").classList.add("hidden");
-            showView("pickTeamView");
-        }
-
-        async function startVoteForTeam() {
-            const teamId = parseInt(document.getElementById("voteTeamSelect").value);
-            const pickErr = document.getElementById("pickError");
-            pickErr.classList.add("hidden");
-
-            const key = "voto:" + teamId + ":" + normalize(voterName);
-            try {
-                const existing = await storage.get(key);
-                if (existing) {
-                    pickErr.textContent = "Ya calificaste este equipo. Elige otro.";
-                    pickErr.classList.remove("hidden");
-                    return;
-                }
             } catch (e) {
-                pickErr.textContent = "No se pudo conectar: " + (e && e.message ? e.message : "revisa BLOB_URL.");
-                pickErr.classList.remove("hidden");
+                qrBox.innerHTML = '<div class="qr-placeholder">No se pudo cargar el código QR</div>';
+            }
+        }
+
+        function loadUserFromStorage() {
+            let u = localStorage.getItem('app_user');
+            if (u) {
+                try {
+                    currentUser = JSON.parse(u);
+                    showStep('stepPick');
+                    document.getElementById('welcomeUser').textContent = `Hola, ${currentUser.name} (${currentUser.role})`;
+                } catch (e) {}
+            }
+        }
+
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-opt').forEach(el => {
+                if (el.dataset.role === role) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+        }
+
+        function login() {
+            const nameInput = document.getElementById('voterName');
+            const err = document.getElementById('loginErr');
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                err.classList.remove('hidden');
                 return;
             }
+            err.classList.add('hidden');
 
-            openVoteView(teamId);
+            currentUser = {
+                name: name,
+                role: selectedRole
+            };
+            localStorage.setItem('app_user', JSON.stringify(currentUser));
+
+            document.getElementById('welcomeUser').textContent = `Hola, ${currentUser.name} (${currentUser.role})`;
+            showStep('stepPick');
         }
 
-        function openVoteView(teamId) {
-            const t = getTeamById(teamId);
-            document.getElementById("voteTeamNum").textContent = "Equipo " + t.id;
-            document.getElementById("voteTeamAuthors").textContent = t.authors;
-            document.getElementById("voteTeamTopic").textContent = t.topic;
+        function showStep(stepId) {
+            ['stepLogin', 'stepPick', 'stepVoting', 'stepThanks'].forEach(id => {
+                let el = document.getElementById(id);
+                if (id === stepId) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+        }
 
-            currentRating = null;
-            const pillsRow = document.getElementById("pillsRow");
-            pillsRow.innerHTML = "";
-            for (let i = 1; i <= 10; i++) {
-                const pill = document.createElement("div");
-                pill.className = "pill";
-                pill.textContent = i;
-                pill.id = "vpill-" + i;
-                pill.onclick = () => selectVoteRating(i);
-                pillsRow.appendChild(pill);
-            }
-            document.getElementById("submitBtn").disabled = true;
-            document.getElementById("submitBtn").textContent = "Enviar calificación";
+        function onTeamSelectChange() {
+            const val = document.getElementById('teamSelect').value;
+            const btn = document.getElementById('startVoteBtn');
+            btn.disabled = !val;
+        }
 
-            voteContext = { teamId: teamId };
-            showView("voteView");
+        function startVotingForTeam() {
+            const val = document.getElementById('teamSelect').value;
+            if (!val) return;
+
+            selectedTeamId = parseInt(val, 10);
+            const team = TEAMS.find(t => t.id === selectedTeamId);
+            if (!team) return;
+
+            document.getElementById('voteTeamNum').textContent = `Equipo #${team.id}`;
+            document.getElementById('voteTeamAuthors').textContent = team.authors;
+            document.getElementById('voteTeamTopic').textContent = team.topic;
+
+            resetRatingPills();
             startTimer();
+            showStep('stepVoting');
         }
 
-        function selectVoteRating(value) {
-            currentRating = value;
-            for (let i = 1; i <= 10; i++) {
-                document.getElementById("vpill-" + i).classList.toggle("selected", i === value);
-            }
-            document.getElementById("submitBtn").disabled = false;
+        function resetRatingPills() {
+            selectedRating = null;
+            document.querySelectorAll('#pillsBox .pill').forEach(p => p.classList.remove('selected'));
+            document.getElementById('voteErr').classList.add('hidden');
+        }
+
+        function pickRating(val) {
+            selectedRating = val;
+            document.querySelectorAll('#pillsBox .pill').forEach((p, idx) => {
+                if (idx + 1 === val) {
+                    p.classList.add('selected');
+                } else {
+                    p.classList.remove('selected');
+                }
+            });
+            document.getElementById('voteErr').classList.add('hidden');
         }
 
         function startTimer() {
-            let remaining = VOTE_SECONDS;
-            const numEl = document.getElementById("timerNum");
-            const barEl = document.getElementById("timerBar");
-            numEl.textContent = remaining;
-            barEl.style.width = "100%";
-            numEl.classList.remove("urgent");
-            barEl.classList.remove("urgent");
+            clearInterval(timerInterval);
+            timeLeft = 60;
+            updateTimerUI();
 
-            if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                remaining--;
-                numEl.textContent = remaining;
-                barEl.style.width = (remaining / VOTE_SECONDS * 100) + "%";
-                if (remaining <= 10) {
-                    numEl.classList.add("urgent");
-                    barEl.classList.add("urgent");
-                }
-                if (remaining <= 0) {
+                timeLeft--;
+                updateTimerUI();
+                if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    timerInterval = null;
-                    if (currentRating) {
-                        submitVote();
-                    } else {
-                        showView("pickTeamView");
-                        const pickErr = document.getElementById("pickError");
-                        pickErr.textContent = "Se acabó el tiempo antes de calificar. Elige de nuevo.";
-                        pickErr.classList.remove("hidden");
-                    }
                 }
             }, 1000);
         }
 
-        async function submitVote() {
-            if (!currentRating || !voteContext) return;
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-            const btn = document.getElementById("submitBtn");
-            btn.disabled = true;
-            btn.textContent = "Enviando...";
+        function updateTimerUI() {
+            const timerNum = document.getElementById('timerNum');
+            const timerBar = document.getElementById('timerBar');
 
-            const teamId = voteContext.teamId;
-            const key = "voto:" + teamId + ":" + normalize(voterName);
-            const payload = {
-                voter: voterName,
-                role: selectedRole,
-                teamId: teamId,
-                rating: currentRating,
+            timerNum.textContent = timeLeft;
+            const pct = (timeLeft / 60) * 100;
+            timerBar.style.width = `${pct}%`;
+
+            if (timeLeft <= 10) {
+                timerNum.classList.add('urgent');
+                timerBar.classList.add('urgent');
+            } else {
+                timerNum.classList.remove('urgent');
+                timerBar.classList.remove('urgent');
+            }
+        }
+
+        function submitVote() {
+            if (!selectedRating) {
+                document.getElementById('voteErr').classList.remove('hidden');
+                return;
+            }
+
+            clearInterval(timerInterval);
+
+            const vote = {
+                voter: currentUser.name,
+                role: currentUser.role,
+                teamId: selectedTeamId,
+                rating: selectedRating,
                 ts: Date.now()
             };
 
-            try {
-                const result = await storage.set(key, JSON.stringify(payload));
-                if (!result) {
-                    btn.textContent = "Error, intenta de nuevo";
-                    btn.disabled = false;
-                    return;
-                }
-                const t = getTeamById(teamId);
-                document.getElementById("thanksMsg").textContent = `Calificaste al Equipo ${t.id} — ${t.authors} con ${currentRating}/10.`;
-                showView("thanksView");
-            } catch (e) {
-                btn.textContent = "Error: " + (e && e.message ? e.message : "desconocido");
-                btn.disabled = false;
+            votesStore.push(vote);
+            localStorage.setItem('app_votes', JSON.stringify(votesStore));
+
+            showStep('stepThanks');
+        }
+
+        function resetToPick() {
+            document.getElementById('teamSelect').value = '';
+            document.getElementById('startVoteBtn').disabled = true;
+            showStep('stepPick');
+        }
+
+        function toggleView() {
+            isResultsView = !isResultsView;
+            const btn = document.getElementById('navBtn');
+            const viewVote = document.getElementById('viewVote');
+            const viewResults = document.getElementById('viewResults');
+
+            if (isResultsView) {
+                btn.textContent = 'Volver a Votar';
+                viewVote.classList.add('hidden');
+                viewResults.classList.remove('hidden');
+                renderResults();
+            } else {
+                btn.textContent = 'Resultados';
+                viewResults.classList.add('hidden');
+                viewVote.classList.remove('hidden');
             }
         }
 
-        async function goResults() {
-            showView("resultsView");
-            const countEl = document.getElementById("voteCount");
-            countEl.textContent = "Cargando votos...";
+        function renderResults() {
+            const resultsList = document.getElementById('resultsList');
+            document.getElementById('totalVotesCount').textContent = `Total votos: ${votesStore.length}`;
 
-            try {
-                const all = await readAllVotes();
-                const keys = Object.keys(all).filter(k => k.startsWith("voto:"));
-
-                const juezSums = {};
-                const juezCounts = {};
-                const equipoSums = {};
-                const equipoCounts = {};
-                TEAMS.forEach(t => {
-                    juezSums[t.id] = 0; juezCounts[t.id] = 0;
-                    equipoSums[t.id] = 0; equipoCounts[t.id] = 0;
-                });
-
-                for (const k of keys) {
-                    try {
-                        const data = JSON.parse(all[k]);
-                        if (data.teamId && typeof data.rating === "number") {
-                            if (data.role === "juez") {
-                                juezSums[data.teamId] = (juezSums[data.teamId] || 0) + data.rating;
-                                juezCounts[data.teamId] = (juezCounts[data.teamId] || 0) + 1;
-                            } else {
-                                equipoSums[data.teamId] = (equipoSums[data.teamId] || 0) + data.rating;
-                                equipoCounts[data.teamId] = (equipoCounts[data.teamId] || 0) + 1;
-                            }
-                        }
-                    } catch (e) { }
-                }
-
-                countEl.textContent = `${keys.length} voto${keys.length === 1 ? "" : "s"} registrado${keys.length === 1 ? "" : "s"}`;
-
-                const compareBody = document.getElementById("compareTableBody");
-                compareBody.innerHTML = "";
-                TEAMS.forEach(t => {
-                    const jAvg = juezCounts[t.id] > 0 ? (juezSums[t.id] / juezCounts[t.id]) : null;
-                    const eAvg = equipoCounts[t.id] > 0 ? (equipoSums[t.id] / equipoCounts[t.id]) : null;
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-        <td class="team-cell">
-          <div class="authors">${t.id}. ${t.authors}</div>
-          <div class="topic">${t.topic}</div>
-        </td>
-        <td class="num">${jAvg !== null ? jAvg.toFixed(1) : "—"}<div class="votes-sub">${juezCounts[t.id]} voto${juezCounts[t.id] === 1 ? "" : "s"}</div></td>
-        <td class="num">${eAvg !== null ? eAvg.toFixed(1) : "—"}<div class="votes-sub">${equipoCounts[t.id]} voto${equipoCounts[t.id] === 1 ? "" : "s"}</div></td>`;
-                    compareBody.appendChild(row);
-                });
-
-            } catch (e) {
-                countEl.textContent = "Error: " + (e && e.message ? e.message : "desconocido");
-            }
-        }
-
-        function goWelcome() {
-            showView("welcomeView");
-        }
-
-        function showView(id) {
-            ["welcomeView", "pickTeamView", "voteView", "thanksView", "resultsView"].forEach(v => {
-                document.getElementById(v).classList.toggle("hidden", v !== id);
+            // Aggregate ratings
+            const stats = TEAMS.map(t => {
+                const teamVotes = votesStore.filter(v => v.teamId === t.id);
+                const count = teamVotes.length;
+                const sum = teamVotes.reduce((acc, curr) => acc + curr.rating, 0);
+                const avg = count > 0 ? (sum / count) : 0;
+                return {
+                    team: t,
+                    count: count,
+                    avg: avg
+                };
             });
-            window.scrollTo(0, 0);
+
+            // Sort by Average desc, then by count desc
+            stats.sort((a, b) => {
+                if (b.avg !== a.avg) return b.avg - a.avg;
+                return b.count - a.count;
+            });
+
+            resultsList.innerHTML = '';
+
+            stats.forEach((item, index) => {
+                const rankNum = index + 1;
+                let rankClass = '';
+                if (rankNum === 1) rankClass = 'g1';
+                else if (rankNum === 2) rankClass = 'g2';
+                else if (rankNum === 3) rankClass = 'g3';
+
+                const pct = (item.avg / 10) * 100;
+
+                const row = document.createElement('div');
+                row.className = 'result-row';
+                row.innerHTML = `
+                    <div class="rank ${rankClass}">${rankNum}</div>
+                    <div class="result-info">
+                        <div class="result-authors">Equipo #${item.team.id}: ${item.team.authors}</div>
+                        <div class="result-topic">${item.team.topic}</div>
+                        <div class="bar-bg">
+                            <div class="bar-fill" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                    <div class="result-score">
+                        <div class="score-num">${item.avg.toFixed(1)}</div>
+                        <div class="score-votes">${item.count} ${item.count === 1 ? 'voto' : 'votos'}</div>
+                    </div>
+                `;
+                resultsList.appendChild(row);
+            });
         }
     </script>
 </body>
